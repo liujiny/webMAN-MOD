@@ -24,16 +24,18 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git ls-files -z | xargs -0 sed -i -E 's/(#\s*define\s+MAX_SLAUNCH_ITEMS\s+)2000/\14000/'
 
-      - name: Patch makefile to use PSL1GHT instead of Sony SDK
+      - name: Prepare Flags and Patch Makefile
         run: |
           set -eux
-          if [ -f makefile ]; then
-            cp makefile makefile.bak
-            awk 'NR==1{print "PS3DEV ?= /usr/local/ps3dev"; print "PSL1GHT ?= $(PS3DEV)"; print "include $(PSL1GHT)/ppu_rules"; skip=1} skip && NR<=2 { next } !skip || NR>2 { print }' makefile > makefile.new
-            mv makefile.new makefile
-            sed -i 's/ppu-lv2-gcc/ppu-gcc/g' makefile || true
-            sed -i 's/^CRT_HEAD/# CRT_HEAD/g; s/^CRT_TAIL/# CRT_TAIL/g' makefile || true
-          fi
+          cp ./flags/flags_full.h ./flags.h
+          sed -i 's/^include.*sdk.makedef.mk/# &/' Makefile
+          sed -i 's/^include.*sdk.target.mk/# &/' Makefile
+          sed -i '1i PS3DEV := /usr/local/ps3dev\nPSL1GHT := $(PS3DEV)\ninclude $(PSL1GHT)/ppu_rules' Makefile
+          sed -i 's/ppu-lv2-gcc/ppu-gcc/g' Makefile
+          sed -i 's/ppu-lv2-g++/ppu-g++/g' Makefile
+          sed -i 's/ppu-lv2-objcopy/ppu-objcopy/g' Makefile
+          sed -i 's/ppu-lv2-ar/ppu-ar/g' Makefile
+          sed -i 's/ppu-lv2-prx-strip/ppu-prx-strip/g' Makefile
 
       - name: Build
         run: make -j"$(nproc)"
