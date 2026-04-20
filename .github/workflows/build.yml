@@ -27,23 +27,22 @@ jobs:
       - name: Prepare Flags and Patch Makefile
         run: |
           set -eux
-          # 1. 准备 flags
+          # 1. 准备配置头文件
           cp ./flags/flags_full.h ./flags.h
 
-          # 2. 确定文件名（兼容 Makefile 或 makefile）
+          # 2. 自动识别文件名
           TARGET="makefile"
           if [ -f "Makefile" ]; then TARGET="Makefile"; fi
-          echo "Found target file: $TARGET"
 
-          # 3. 注释掉官方 SDK 引用
+          # 3. 彻底屏蔽官方 SDK 的引用
           sed -i 's/^include.*sdk.makedef.mk/# &/' "$TARGET"
           sed -i 's/^include.*sdk.target.mk/# &/' "$TARGET"
 
-          # 4. 注入 PSL1GHT 规则
-          # 插入三行定义到文件开头
-          sed -i "1i PS3DEV := /usr/local/ps3dev\nPSL1GHT := \$(PS3DEV)\ninclude \$(PSL1GHT)/ppu_rules" "$TARGET"
+          # 4. 注入正确的 PSL1GHT 编译规则路径
+          # 注意：在 ps3dev 镜像中，该文件通常位于 /usr/local/ps3dev/ppu/ 目录下
+          sed -i '1i include /usr/local/ps3dev/ppu/ppu_rules' "$TARGET"
 
-          # 5. 替换工具名
+          # 5. 替换工具链名称（从官方 lv2 名称改为开源名称）
           sed -i 's/ppu-lv2-gcc/ppu-gcc/g' "$TARGET"
           sed -i 's/ppu-lv2-g++/ppu-g++/g' "$TARGET"
           sed -i 's/ppu-lv2-objcopy/ppu-objcopy/g' "$TARGET"
