@@ -232,12 +232,13 @@ static void parse_script(const char *script_file, bool check_running)
 						if(_islike(line, "mounting")) {ret = is_mounting;} else
 						if(_islike(line, "log")) {ret = USER_LOGGEDIN; if(strstr(line, "out")) ret = !ret;} else
 						#if defined(PS3MAPI) || defined(DEBUG_MEM)
-						if(_islike(line, "titleid ")){path += 8; get_game_info(); ret = (strlen(_game_TitleID) >= strlen(path)) ? bcompare(_game_TitleID, path, strlen(path), path) : 0;} else
+						if(_islike(line, "titleid ")){path += 8; get_game_info(); ret = (strlen(_game_TitleID) >= strlen(path)) ? !bcompare(_game_TitleID, path, strlen(path), path) : 0;} else
 						#endif
 						#ifdef VIRTUAL_PAD
 						if(_islike(line, "singleUser"))   {ret = has_one_user_dir();} else
 						#endif
 						#ifdef COBRA_ONLY
+						if(_islike(line, "qCFW"))    {ret = is_qcfw;} else
 						if(_islike(line, "Cobra"))   {ret = cobra_version;} else
 						if(_islike(line, "Debug"))   {ret = isCobraDebug;} else
 						if(_islike(line, "Mamba"))   {ret = is_mamba;} else

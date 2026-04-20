@@ -111,7 +111,7 @@ SYS_MODULE_STOP(wwwd_stop);
 SYS_MODULE_EXIT(wwwd_stop);
 
 #define WM_APPNAME			"webMAN"
-#define WM_VERSION			"1.47.48o MOD"
+#define WM_VERSION			"1.47.48p MOD"
 #define WM_APP_VERSION		WM_APPNAME " " WM_VERSION
 #define WEBMAN_MOD			WM_APPNAME " MOD"
 
@@ -291,6 +291,7 @@ int npklic_struct_offset = 0; u8 klic_polling = 0;
 #ifdef COBRA_ONLY
 static bool is_mamba = false;
 #endif
+static bool is_qcfw = false;
 static u16 cobra_version = 0;
 
 static u64 copied_size  = 0;
@@ -367,11 +368,12 @@ static void unlink_file(const char *drive, const char *path, const char *file);
 #include "include/init/html.h"
 #include "include/init/language.h"
 #include "include/poll/fancontrol.h"
-#include "include/init/firmware.h"
 
 #include "include/notify/led.h"
 #include "include/notify/vsh_notify.h"
 #include "include/notify/show_msg2.h"
+
+#include "include/init/firmware.h"
 
 #ifdef USE_NTFS
 
@@ -592,7 +594,10 @@ again_debug:
 
 	// sys_ppu_thread_sleep(2);
 
-	led(YELLOW, OFF);
+	if(is_qcfw)
+		led(GREEN, ON); // set led to YELLOW for qCFW
+	else
+		led(YELLOW, OFF);
 
 	#ifdef WM_REQUEST
 	start_event(EVENT_AUTOEXEC);

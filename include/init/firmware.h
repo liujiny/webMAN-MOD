@@ -107,6 +107,9 @@ static void detect_firmware(void)
 		peek_lv1 = lv1_peek_hen;
 		poke_lv1 = lv1_poke_hen;
 	}
+
+	// detect qcfw payload
+	is_qcfw = (lv1_peek_cfw(0x240) == 0x11223344aabbccddULL);
 #endif
 
 	// get payload type & cobra_version
