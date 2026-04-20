@@ -22,7 +22,7 @@ jobs:
         run: |
           set -eux
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git ls-files | xargs sed -i -E 's/(#\s*define\s+MAX_SLAUNCH_ITEMS\s+)2000/\14000/'
+          git ls-files -z | xargs -0 sed -i -E 's/(#\s*define\s+MAX_SLAUNCH_ITEMS\s+)2000/\14000/'
 
       - name: Patch makefile to use PSL1GHT instead of Sony SDK
         run: |
