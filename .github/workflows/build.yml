@@ -27,22 +27,30 @@ jobs:
       - name: Prepare Flags and Patch Makefile
         run: |
           set -eux
-          # 1. 准备配置头文件
+          #1. 准备配置头文件
           cp ./flags/flags_full.h ./flags.h
 
           # 2. 自动识别文件名
           TARGET="makefile"
           if [ -f "Makefile" ]; then TARGET="Makefile"; fi
 
-          # 3. 彻底屏蔽官方 SDK 的引用
+          # 3. 动态寻找 ppu_rules 的真实路径
+          # 这行命令会在 /usr/local/ps3dev 目录下搜索 ppu_rules 并返回第一个匹配结果
+          PPU_RULES_PATH=$(find /usr/local/ps3dev -name ppu_rules | head -n 1)
+          echo "Detected ppu_rules at: $PPU_RULES_PATH"
+
+          # 4. 如果没找到则报错提醒（防止后面编译报莫名其妙的错）
+          if [ -z "$PPU_RULES_PATH" ]; then
+            echo "Error: Could not find ppu_rules in /usr/local/ps3dev"
+            exit 1
+          fi
+
+          # 5. 屏蔽官方 SDK 引用并注入动态路径
           sed -i 's/^include.*sdk.makedef.mk/# &/' "$TARGET"
           sed -i 's/^include.*sdk.target.mk/# &/' "$TARGET"
+          sed -i "1i include $PPU_RULES_PATH" "$TARGET"
 
-          # 4. 注入正确的 PSL1GHT 编译规则路径
-          # 注意：在 ps3dev 镜像中，该文件通常位于 /usr/local/ps3dev/ppu/ 目录下
-          sed -i '1i include /usr/local/ps3dev/ppu/ppu_rules' "$TARGET"
-
-          # 5. 替换工具链名称（从官方 lv2 名称改为开源名称）
+          # 6. 替换工具链名称（从官方名改为开源名）
           sed -i 's/ppu-lv2-gcc/ppu-gcc/g' "$TARGET"
           sed -i 's/ppu-lv2-g++/ppu-g++/g' "$TARGET"
           sed -i 's/ppu-lv2-objcopy/ppu-objcopy/g' "$TARGET"
