@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ps3dev/ps3dev:master
+      image: psl1ght/psl1ght:latest
 
     steps:
       - name: Checkout
